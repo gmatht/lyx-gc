@@ -1,0 +1,26 @@
+#!/bin/sh
+#This is a small shell script that adds lyx-gc.dir to the path so that LyX
+#finds our "lyx-gc.dir/chktex" instead of /usr/bin/chktex. It then runs Lyx.
+export LANG=en_AU.UTF-8
+export ORIG_CHKTEX=`which chktex`
+
+if echo "$0" | grep '^/' > /dev/null
+then
+	newpath=path/"$0"
+else 
+	newpath=`pwd`/path/"$0"
+fi
+newpath=`echo "$newpath" | sed 's/\/[^\/]*$//g'`
+export PATH=$newpath:$PATH
+echo Path used by lyx is: $PATH
+if test -z "$LYX"
+	then echo b 
+	LYX=`which i786-pc-linux-gnu-lyx lyx-qt lyx-xforms lyx | head -n1`
+fi
+#export LYX_VERSION=`$LYX --version 2>&1 | grep Frontend: | sed 's/^ *Frontend: */g/head -n1`
+#export LYX_GUI=`$LYX --version 2>&1 | grep Frontend: |  egrep -o -i '(qt|xforms|gtk)'`
+export LYX_GUI=qt
+#echo GUI: $LYX_GUI
+echo "$LYX" "$@"
+#valgrind "$LYX" "$@"
+"$LYX" "$@"

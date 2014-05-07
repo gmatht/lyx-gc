@@ -1,0 +1,23 @@
+#!/bin/sh
+#This a wrapper around chktex.pl. It traps chktex.pl's output to a debug file.
+echo foo > /tmp/foo
+ierr=/tmp/chktex.pl.internal_error
+export XTERM=`which xterm false | head -n1`
+export DEBUGFILE=/tmp/lyx-gc.$USER.DEBUG
+export PATH="/bin:/usr/bin:$PATH"
+
+#errviewer=`which xless gless | head -n1`
+#$0.pl $* 2> $ierr ||  ( $errviewer $ierr  -geometry 111x10 & )
+#$XTERM -e "$0.pl $* || ( echo hi && read -r )" || echo asdfasfdS
+
+echo -------- START --------- >> $DEBUGFILE
+echo -- PARAMS $* >> $DEBUGFILE
+echo -- PWD `pwd` >> $DEBUGFILE
+#$XTERM -e "$0.pl $* || ( echo END OF LYX GRAMMAR CHECKING LOG && read -r )" || $0.pl $*
+#$0.pl $*  2> $ierr
+errviewer=`which xless gless | head -n1`
+$0.pl $* 2> $ierr ||  ( $errviewer $ierr  -geometry 131x10 & )
+#$0.pl $* 
+#echo $ierr 1>&2
+echo -- PARAMS $* > /tmp/params
+

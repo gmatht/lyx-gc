@@ -13,14 +13,47 @@ use strict;
 use warnings;
 use File::Basename;
 #I should also use Regexp::Assemble, with the Track and matched options.
-#use utf8;
+use CGI qw(:standard);
+use File::Temp qw/ tempfile tempdir /;
+
+#print "Content-type: text/plain\r\n\r\n";
+print "Content-type: text/plain\n\n";
+
+our $filename = "deadbeef";
+#my $filetext = 'This not is a\$x$ grammar error'."\n";
+
+our $filetext = param('t') or (print "No text entered.\n" and exit(0));
+our $ffiletext=$filetext;
+
+if (length($filetext) > 1050000) {
+     (print "Input is larger than one Megabyte. Are you sure that's a TeX file you send me? Maybe try breaking it into smaller chunks." and exit(0));
+}
+
+our $java="java";
+our $altjava="/usr/lib/jvm/java-6-sun-1.6.0.26/jre/bin/java";
+if ( -e $altjava ) {
+	$java = $altjava;
+}
+
+our $languagetool="../../.data/LanguageTool-2.2/languagetool-commandline.jar";
+our $altlanguagetool="/usr/local/share/LanguageTool-2.2/languagetool-commandline.jar";
+if ( -e $altlanguagetool ) { $languagetool=$altlanguagetool; };
+our $detex="detex";
+if ( -e "../tex2txt.pl" ) { $detex="/usr/bin/perl ../tex2txt.pl"; };
+
+
+#$java = '/usr/lib/jvm/java-6-sun-1.6.0.26/bin/java';
+
+#if ( -e $altjava ) {
+#	$java = $altjava;
+#}
 
 use Cwd 'abs_path';
 
 ################################################################################
 # GLOBAL VARIABLES (Bad boy! *Smack*)
 
-our $filename; # the filename of the main file we are checking for errors.
+#our $filename; # the filename of the main file we are checking for errors.
 
 our %child_errors=(); 
 our %false_positives;
@@ -106,6 +139,8 @@ Rassert($m_,' \$ $a$ ','$,$');
 Rassert("$mathblock","$start_math abd$end_math edf","$start_math abd$end_math");
 
 our $notinmath="(?![^\\$start_math]*$end_math)";
+our $notinmath="(?![^\\$start_math]*$end_math)";
+Rassert("X.$notinmath","XY foo $start_math XZ abd$end_math","XY");
 
 Rassert("X.$notinmath","XY foo $start_math XZ abd$end_math","XY");
 
@@ -403,7 +438,7 @@ Adsfasdf.
 
 #my $names="(?!Saari|Nanson|Condorcet|Borda|Fishburn|Laslier|Dodgson|Tideman)";
 my $corpnames="Intel";
-my $names="Achilles|Dam|Mally|Kant|Kamp|Burgess|Rabin|Broersen|Johnsson|Saari|Nanson|Condorcet|Borda|Fishburn|Laslier|Dodgson|Tideman|Pratt|Lei|Clarke|Emerson|Sistla|Wolper|Vardi|Schnoebelen|Turing|Broesen|$corpnames|Until|Since|Hodkinson|Dedekind|Borel|Achilles|Zeno|Zenoness|Läuchlii|Leonard|Stavi|Dedekind|Planck|Hintikka|Lange|Waldmeister";
+my $names="Achilles|Dam|Mally|Kant|Kamp|Burgess|Rabin|Broersen|Johnsson|Saari|Nanson|Condorcet|Borda|Fishburn|Laslier|Dodgson|Tideman|Pratt|Lei|Clarke|Emerson|Sistla|Wolper|Vardi|Schnoebelen|Turing|Broesen|$corpnames|Until|Since|Hodkinson|Dedekind|Borel|Achilles|Zeno|Zenoness|LÃ¤uchlii|Leonard|Stavi|Dedekind|Planck|Hintikka|Lange|Waldmeister";
 
 Rassert($nonstoppar,'we may consider probability spaces to be a pair $(\outcomes,m)$. 
 
@@ -727,12 +762,10 @@ SimpleRule("a special atoms"),
 ["Personal rule - remove the i","[Aa]utomation","",""]
 );
 
-
-open(DEBUG_ERROR_TYPES, ">DEBUG_ERROR_TYPES.latexgc") or die "Can't open ".our $filename.".texp for writing: $!";
-foreach (@ErrorTypes){
-	print DEBUG_ERROR_TYPES $new_error_type.join(chr(0),@$_)."\n";
-}
-close(DEBUG_ERROR_TYPES);
+#open(DEBUG_ERROR_TYPES, ">DEBUG_ERROR_TYPES.latexgc") or die "Can't open ".our $filename.".texp for writing: $!";
+#foreach (@ErrorTypes){
+#	print DEBUG_ERROR_TYPES join('##',@$_)."\n\n"
+#}
 
 Rassert('\b([[:alpha:]]+)\b\s+\b\1\b',' det det fab ','det');
 
@@ -844,8 +877,8 @@ foreach my $r (0..@eitheror-1)
 sub FindErrors {
 my @ErrorTypes=@{shift(@_)};
 my $OutFiles=shift(@_);
-my $filetext=shift(@_);
-my $min_block_size=shift(@_);
+my $filetext=$ffiletext;
+my $min_block_size=200;
 ##
 
 my $ErrorRegex;
@@ -921,15 +954,12 @@ if (0) { #BUG: Why did I comment this out? Too many false positives?
 				,"",,$filename);
 				$inEmptyParBlock=0;
 		}
-
-		
 			
 		if ($partext =~ /[\\]begin[{][^}]*[}]\s*$/) {
 			$inEmptyParBlock=1;
 		} elsif ($partext !~ /^$/) {
 			$inEmptyParBlock=0;
 		}
-		
 }
 
 		# if a par is short, we do not care if it is a dup.
@@ -962,10 +992,8 @@ if (0) { #BUG: Why did I comment this out? Too many false positives?
 			$blocktext_ =~ s/$Erase//g;
 		}
 
-
 		#Splits the file up so that every second array element is a
 		#violation of the rule ErrorRegex.
-		
 		
 		my @violations = split $_->[4], $blocktext_;
 		
@@ -981,7 +1009,7 @@ if (0) { #BUG: Why did I comment this out? Too many false positives?
 			$merged=$violations[$i-2].$trigger_text;
 			$linenum=$linenum+NumNewlines($merged);
 			my $ErrorND=$ErrorName.'. ';
-			if ($ErrorDescription ne "") {
+			if (defined $ErrorDescription and $ErrorDescription ne "") {
 				$ErrorND .=$ErrorDescription.'. ';
 			}
 
@@ -1014,9 +1042,10 @@ if (0) { #BUG: Why did I comment this out? Too many false positives?
 					builddict();
 					
 					if (defined($dictionary{$arg})) {
+						s/ARG$n.CAP/BUG/g;
 						$realerror=0;
 					} else {
-						s/ARG$n.CAP/\"$arg\" does not appear to be a name or other word that is usually starts with a capital/g;
+						$ThisErrorDescription=~s/ARG$n.CAP/\"$arg\" does not appear to be a name or other word that is usually starts with a capital/g;
 					}
 				}
 				$ThisErrorDescription =~ s/ARG$n/\"$arg\"/g;
@@ -1041,6 +1070,9 @@ if (0) { #BUG: Why did I comment this out? Too many false positives?
 					$ThisErrorDescription =~ s/ARG2/\"$violations[$i+1]\"/g;
 				}
 			}
+			#$ErrorContext =~ s/r/R/g;	
+			#$ErrorContext =~ s/\n/_/g;	
+			$ErrorContext =~ s/\r/ï¿½/g; ##CGI-CHANGE
 			if ($realerror) {ReportError($OutFiles,$linenum,1,666,$ErrorName,$ThisErrorDescription,$violations[$i-1],$ErrorContext,$rule_ptrs,$filename);}
 
 			$nErrors++;
@@ -1075,21 +1107,6 @@ if ($f>-1) {
 return ($rule_context)}
 
 ###########################################################################
-sub Report_Child_Errors {
-my $OutFiles=shift(@_); # e.g. (*STDERR)
-
-#our %child_errors;
-#our $filename;
-my $child_errors_str = join (".\n",keys %child_errors);
-
-if ($child_errors_str ne "") {
-	ReportError($OutFiles,1,1,667,"Errors in child file(s)",
-		"\n$child_errors_str.  \n\nNote that many errors will not be detected in child files, unless you check each  file individually, you may not detect all errors",
-		"","","",$filename);} 
-}
-
-
-###########################################################################
 sub ReportError {
 # Reports an error to outfiles. 
 
@@ -1106,15 +1123,8 @@ my $rule_ptrs=shift(@_);    # e.g. "    ^^^^^^^^^         "
 my $error_filename=shift(@_);    # e.g. SampleErrors.tex
 my $suggestion=shift(@_);    # e.g. SampleErrors.tex
 
-#my $LyX_newline_hack="\t\t\t\t\t\t\t\t\t\t";
-my $LyX_newline_hack;
-my $LyX_par_hack;
-my $LyX_colon_hack = "<COLON/>";
-
 our $filename; #error_filename may differ from global filename if error_filename is a child file.
 our %child_errors;
-
-#fflush PF
 
 if (!defined $OutFiles)		{ printf STDERR "Outfiles undefined in ReportError\n"; }
 if (!defined $line_num)		{ printf STDERR "line_num undefined in ReportError\n"; }
@@ -1134,43 +1144,7 @@ $rule_context =~ s/[ \n]$//g;
 $rule_id="$rule_id; $rule_name";
 my $ErrorText="";
 
-my $lyx_gui= lc($ENV{"LYX_GUI"});
-if (!defined $lyx_gui)	{ $lyx_gui ="";}
-
-#printf STDERR ":$lyx_gui:\n";
-printf STDERR "LYX_GUI:$lyx_gui:\n";
-
-if ($lyx_gui  =~ /qtXXXXX/) {
-	$LyX_newline_hack=" \t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t";
-	$LyX_par_hack="$LyX_newline_hack. $LyX_newline_hack";
-	#We replaces the ASCII Colon with a UTF-8 Ethiopic, Cherokee colon.
-	#$LyX_colon_hack = chr(225).chr(141).chr(161);
-
-	#$LyX_par_hack="$LyX_newline_hack.\t";
-} elsif ($lyx_gui  eq "xforms") {
-	$LyX_newline_hack=
-"                                                                              ".
-"                                                                              ".
-"                                                                              ".
-"                                                                              ";
-	$LyX_par_hack=$LyX_newline_hack;
-
-#	$LyX_par_hack="$LyX_newline_hack.$LyX_newline_hack";
-#	$LyX_par_hack="$LyX_newline_hack";
-} else {
-	$LyX_newline_hack="  ";
-	$LyX_par_hack=$LyX_newline_hack;
-	#$LyX_par_hack="    ";
-}
-
-#Useful for debugging
-#$LyX_newline_hack='\n';
-#$LyX_par_hack='\n\n';
-#$ErrorText="(($rule_name)).\n\n";
-
-if ($filename ne $error_filename) {
-	$child_errors{"> $rule_name in \"$error_filename\""}=""; # "" is arbitrary, we are just making sure the key $error_filename exists.
-} elsif (our $output_format =~ "-v[03]") {
+if (our $output_format =~ "-v[03]") {
 	if ($rule_description ne "") {
 		$ErrorText .="$rule_description.\n\n";
 	}
@@ -1191,12 +1165,6 @@ if ($filename ne $error_filename) {
 
 
 	if (defined $suggestion) { $ErrorText.="\n$suggestion"; }
-	#$ErrorText =~ tr/\n/ /; # ugly hacks to fit error into chktex -v0 mode format.
-	$ErrorText =~ s/\n\n/$LyX_par_hack/g; # ugly hacks to fit error into chktex -v0 mode format.
-	$ErrorText =~ s/\n/$LyX_newline_hack/g; # ugly hacks to fit error into chktex -v0 mode format.
-	#$ErrorText =~ s/[:]/COLON/g;
-	$ErrorText =~ s/[:]/$LyX_colon_hack/g;
-	$rule_id =~ s/[:]/$LyX_colon_hack/g;
 
 	$ErrorText = tokens_to_user($ErrorText); # or we could use detokenize(ErrorText) if our users were familiar with TeX.
 
@@ -1235,8 +1203,8 @@ if ($filename ne $error_filename) {
 		
 #		my $S="[7m"; #tags that start and end inverse mode
 #		my $E="[27m";
-#		my $S="»"; #tags that start and end inverse mode
-#		my $E="«";
+#		my $S="Â»"; #tags that start and end inverse mode
+#		my $E="Â«";
 #		my $S=chr(0xAB);
 #		my $E=chr(0xBB);
 		my $S=">>";
@@ -1244,7 +1212,7 @@ if ($filename ne $error_filename) {
 		
 		$rule_context=embed_error_tags($rule_context,$rule_ptrs,$S,$E);
 	}
-	$ErrorText="Warning $rule_id in $error_filename line $line_num: $ErrorText\n$rule_context\n$rule_ptrs\n";
+	$ErrorText="* line $line_num: $rule_name; $ErrorText\n$rule_context\n$rule_ptrs\n";
 }
 
 #$ErrorText =~ tr/\'/\"/;
@@ -1253,7 +1221,7 @@ if ($filename ne $error_filename) {
 my $error_signature="$rule_id:$rule_name:$rule_trigger:$rule_context";
 $error_signature=~ s/\n/ /g;
 
-print PF "$error_signature\n";
+#print PF "$error_signature\n";
 
 if (defined($false_positives{$error_signature})!=1) {
 	foreach(@{$OutFiles}) {
@@ -1264,152 +1232,6 @@ if (defined($false_positives{$error_signature})!=1) {
 }
 
 }
-
-###########################################################################
-sub Parse_lacheck_Output {
-my $filename=shift(@_);
-my $OutFiles=shift(@_);
-##
-
-#example lacheck output
-#"SampleGrammarErrors.tex", line 46: missing `\ ' after "sentance."
-
-my $nErrors=0;
-my $line_num=""; 
-my $error_filename="";
-my $ErrorName="";
-my $ErrorDescription="";
-
-my $ErrorContext=""; #These are just stubs as lacheck output is very limited.
-my $ErrorPtr="";
-my $col_num="1";
-my $rule_id="lacheck"; 
-
-my $in_error=0;
-
-my $ignore_reg=qr/(?:^possible unwanted space at|^Could not open|^Whitespace before punctation mark in|^punctuation mark \".\" should be placed after end of math mode|^bad character in label|^-> unmatched \"math begin \$"|^.. unmatched)/o;
-#"Could not open" generates false positives in LyX, anyway you are likely to figure it out for your self, soon enough if it were correct
-#why should I care if there is a "bad character in label", it doesn't cause any problems... right?
-
-if ( open(INPUT_FILE, "lacheck $filename|") ) {
-        ###system ("echo Using lacheck on $filename. >> ".'$DEBUGFILE');
-        print (STDERR "running\n  lacheck $filename\n");
-
-	while (<INPUT_FILE>) {
-		if ( $_ =~ /\"(.*)\", line ([[:digit:]]+): (.*)/ ) {
-			{ #We have to put this in a sub block, or else the "!~" operator below will overwrite $1,$2 and $3
-				if ($in_error && $ErrorName !~ $ignore_reg) {
-					ReportError($OutFiles,$line_num,$col_num,$rule_id,$ErrorName,"","",$ErrorContext,$ErrorPtr,$error_filename,"");
-					$nErrors++;
-				}
-			}
-		
-			$error_filename=$1;
-			$line_num=$2;
-			$ErrorName=$3;
-			$ErrorDescription="";
- 
-			$in_error=1;
-		} else {
-			$ErrorDescription .= "\n".$_;
-		        #print (STDERR "\nUnknown lacheck line from $filename:\n  $_");
-		}
-	}
-
-	close (INPUT_FILE);
-	if ($in_error && $ErrorName !~ $ignore_reg) {
-		ReportError($OutFiles,$line_num,$col_num,$rule_id,$ErrorName,$ErrorDescription,"",$ErrorContext,$ErrorPtr,$error_filename);
-		$nErrors++;
-	}
-
-} else {
-        print (STDERR "warning: could not run: \n  lacheck $filename");
-
-}
-
-return ($nErrors)}
-
-
-###########################################################################
-sub Parse_ChkTeX_Output {
-my $filename=shift(@_);
-my $OutFiles=shift(@_);
-##
-
-#We use this function because LyX uses the -v0 output format which is exceptionally terse.
-#This function takes normal verbose -v1 format and puts as much information it can get into
-#whatever output format you choose.
-
-#example ChkTeX output
-#Warning 40 in SampleGrammarErrors.tex line 52: You should put punctuation outside inner math mode.
-#$A:$ is a variable.
-#  ^
-  
-
-my $nErrors=0;
-my $line_num; 
-my $error_filename;
-my $ErrorName;
-my $rule_id; 
-my $ErrorContext;
-my $ErrorPtr;
-my $type;
-
-my $col_num="0"; 
-my $error_pos=1; # The position within an error report. 
-
-my @ChkTex_Params= grep ( /^-[^ov]/,  @ARGV );
-
-# -n17 number of '[' and ']' dont match. Should by disabled as it generates false positives in math text, e.g. you may have
-# "a number in the range [0,1).
-# -n16 generates false postives and LyX should always generate correct code... we hope.
-#my $ChkTeX_Command="/usr/bin/chktex $filename -n16 -n1 -n31 -n27 -n36 -n40 ".join (" ",@ChkTex_Params).' -v1';
-my $ChkTeX_Command="$ENV{ORIG_CHKTEX} $filename -n26 -n24 -n15 -n16 -n1 -n31 -n27 -n36 -n40 -n2 ".join (" ",@ChkTex_Params).' -v1';
-# The -v1 ensures that we get the default output type from chktex regardless of the input stream.
-
-if ( $ENV{ORIG_CHKTEX} ne "" &&   open(INPUT_FILE, $ChkTeX_Command.' |') ) {
-#if (  open(INPUT_FILE, $ChkTeX_Command.' |') ) {
-        ###system ("echo running: $ChkTeX_Command  >> ".'$DEBUGFILE');
-        print (STDERR "running:  $ChkTeX_Command\n");
-
-	while (<INPUT_FILE>) {
-	        #print (STDERR $error_pos." $_");
-		if ($error_pos==1) {
-			if ( $_ =~ /(Warning|Error|Message) ([^ ]+) in (.*) line ([1-9][0-9]*): (.*)/ ) {
-				$type=$1;  #ATM, we ingore type and just use "Warning" for output
-				$rule_id=$2;
-				$error_filename=$3;
-				$line_num=$4;
-				$ErrorName=$5;
-				$ErrorName=~ s/\.$//;
-				$error_pos=2;
-			} else {
-			        print (STDERR "\nUnknown ChkTeX line from $filename:\n$_");
-			}
-		} elsif ($error_pos==2) {
-			$ErrorContext=$_;
-			$ErrorContext=~ s/\.$//;
-			$error_pos=3;
-		} elsif ($error_pos==3) {
-			$ErrorPtr=$_;
-			$nErrors++;
-			ReportError($OutFiles,$line_num,$col_num,$rule_id,$ErrorName,"","",$ErrorContext,$ErrorPtr,$error_filename);
-			$error_pos=1;
-		}
-	}
-	if ($error_pos>1){
-		print (STDERR "ChkTeX output stopped unexpectedly\n");
-	}
-
-	close (INPUT_FILE);
-
-} else {
-        #system ("echo could not run: \n  lacheck $filename".'$DEBUGFILE');
-        print (STDERR "Warning, could not run: $ChkTeX_Command\n");
-
-}
-
-return ($nErrors)}
 
 
 ###########################################################################
@@ -1465,20 +1287,10 @@ my %ignore_regexs=(
 	POSSESIVE_APOSTROPHE => "worlds",
 );
 
-my $out_file="$filename.languagetool";
+my $out_file="$filename";
 if ( open(INPUT_FILE, $out_file) ) {
-        ###system ("echo $filename.languagetool found >> ".'$DEBUGFILE');
-	my $gotlock=0;
-
-	my $lockfile="$out_file.lock";
-
-	use Fcntl ':flock';
-	print STDERR "Wait for lock to read $out_file: We may have to wait several seconds for JLanguageTool to complete\n"; 
-	open (LOCKFILE, ">>$lockfile") or die "cannot open $lockfile for appending";
-	flock (LOCKFILE, LOCK_SH);
-	print STDERR "Got lock to read $out_file\n";
-
 	while (<INPUT_FILE>) {
+		print $_;
 		if ( $error_pos == -1 ) {
 			if ( $_ =~ /Line ([[:digit:]]*), column ([[:digit:]]*),.*Rule ID: (.*)$/ ) {
 				$line_num=$1;
@@ -1501,9 +1313,6 @@ if ( open(INPUT_FILE, $out_file) ) {
 				if ( ! (defined($ignore_regexs{$rule_id}) && ($error_data[1] =~ /$ignore_regexs{$rule_id}/) ) ) {
 					my $ErrorName=$error_data[1];
 					$ErrorName=~ s/Message: //;
-					#my $ErrorContext=$error_data[3]."\n\n".$error_data[2];
-					
-					#my $ErrorSuggestion=$error_data[2];
 					my $ErrorContext=$error_data[2];
 					my $ErrorPtr=$error_data[3];
 					print STDERR "ErrorName: $ErrorName\n";
@@ -1519,11 +1328,6 @@ if ( open(INPUT_FILE, $out_file) ) {
 		}
 	}
 	close (INPUT_FILE);
-  	###system ('rm '.$lockfile);
-	unlink $lockfile;
-  	flock (LOCKFILE, LOCK_UN);
-	close (LOCKFILE);
-  	print STDERR "Released lock to read $out_file\n";
 } else {
 	print STDERR "could not open $out_file for reading\n";
         ###system ("echo $filename.languagetool not found >> ".'$DEBUGFILE');
@@ -1534,19 +1338,8 @@ return ($nErrors)}
 
 
 ###########################################################################
-# From http://www.perlmonks.org/?node_id=36976
-sub Home {
-	return $ENV{HOME}        if $ENV{HOME};
-	return $ENV{USERPROFILE} if $ENV{USERPROFILE};
-	return  "";
-}
-
-
-###########################################################################
 #Mainline
 
-#our $filename="";
-my $filetext;
 
 our $fileout="";
 our $output_format="-v1";
@@ -1564,64 +1357,39 @@ for (my $i=0;$i<@ARGV;$i++) {
 	}
 }
 
-my @lines;
-if ($filename ne "") {
-#	$filename =~ s/.tex$//g;
-	$filename=abs_path($filename);
-
-	open(INFILE,  "$filename")   or die "Can't $filename: $!";
-	@lines = <INFILE>;
-} else {
-	$filename = 'stdin';
-	print STDERR "Reading from stdin\n";
-	@lines = <STDIN>;
-}
-
-
-my $HOME=$ENV{"HOME"};
-my $settings_dir="$HOME/.lyx-gc";
-
-system("mkdir -p '$settings_dir'");
-#mkdir $settings_dir or die "cannot mkdir $settings_dir\n";
-
-my $basename=basename($filename);
-my $falsepositive_filename = $settings_dir . '/' . $basename . '.falsepositive';
-my $positive_filename = $settings_dir . '/' . $basename . '.positive';
-
-if (open (FP, '<' , $falsepositive_filename)) {
-	while (<FP>) {
-		chomp;
-		$false_positives{$_}=1;
-	}
-}
-
-open (PF, '>', $positive_filename) or die "cannot open " . $positive_filename;
-my $date=`date`;
-print PF "FOO $date\n";
-
-
-$filetext = join ("", @lines);
-@lines={}; # Free memory;
-
 my @OutFiles=(*OUTFILE);
 if ($fileout ne "") {
-	#system ("rm $fileout");
-	#system ("echo -n > $fileout");
 	open(OUTFILE, ">$fileout") or die "Can't open $fileout for writing: $!";
 	@OutFiles=(*OUTFILE);
 } else {
 	@OutFiles=(*STDOUT);
 }
+
+$filename="deadbeaf2";
 my @ErrorTypes=GenerateErrorTypes("$filename");
 
 
 my $nErrors=FindErrors(\@ErrorTypes,\@OutFiles,$filetext,200);
 
-#BUG: this will only work if you do not pass in the input file via stdin
-$nErrors+=Parse_JLanguageTool_Output($filename,\@OutFiles);
-$nErrors+=Parse_lacheck_Output($filename,\@OutFiles);
-$nErrors+=Parse_ChkTeX_Output($filename,\@OutFiles);
-Report_Child_Errors(\@OutFiles);
+if ($nErrors==0) 
+{
+	print 'All OK (^_^)';
+}
+if (param('lt'))
+{ 
+	print "\n---- LanguageTool Warnings ----\n";
+	open (FOO, "| $java -jar $languagetool -d ARTICLE_MISSING,HE_VERB_AGR,NOW,EG_NO_COMMA,IE_NO_COMMA,EN_A_VS_AN,WHITESPACE_RULE,UNPAIRED_BRACKETS,EN_UNPAIRED_BRACKETS,COMMA_WHITESPACE,WORD_REPEAT_RULE,COMP_THAN_2,COMMA_PARENTHESIS_WHITESPACE,COMMA_PARENTHESIS_WHITESPACE,DOUBLE_PUNCTUATION,EN_QUOTES - || echo Problem with LanguageTool on this server, try other server.");
+
+	print FOO "$filetext";
+
+	close FOO;
+} 
+
+
+	print "\n---- Spelling Suggestions ----\n";
+	open (FOO, "| $detex | aspell -a -len_UK | grep '^&' | sed 's/ [0-9]* [0-9]*:/:/\ns/^[&].//' | sort | uniq");
+	print FOO "$filetext";
+	close FOO;
 
 if ($fileout ne "") {
 	close OUTFILE;
@@ -1632,5 +1400,3 @@ if ($fileout ne "") {
 	}
 	system ("grep : '$fileout' || echo 'X:1:1: All OK (^_^) $suppressed_msg' >> '$fileout'");
 }
-
-system("nohup nice perl $0.JLanguageTool.pl $filename & " );

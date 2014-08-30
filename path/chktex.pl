@@ -4,6 +4,8 @@
 # BUGS: Only processes a single file at a time. ChkTeX allows you to pass in more than one filename at
 # a time. However, this is not a big problem since LyX does not use this feature of ChkTeX.
 #
+# Should however run consistency checks on child files: Duplicated Paragraphs etc, Colour vs Color.
+#
 # FIX: Err descriptions not displaying
 # utf-8 bugs.
 # "<<" ">>" vs $S, $E
@@ -355,7 +357,7 @@ my %SetOfVowels = (
 	U => "FHILMANXAEIOS", #upper case vowels i.e. F=eff which is a vowel
 	d => "8", #vowels that are digits
 	number=> $vowelnumber,
-	includewords  => "(?:MF|NP|NL|LP|MPC|RTL|RMS|heir|RME|ME|heirloom|honest|honor|honorable|honorarium|honorary|honorific|honour|hour|hourglass|hourly|HTML|XML|FBI|SGML|SDL|HAA|LTL|SAA|S5|FSA)", #RoCTL
+	includewords  => "(?:MF|NP|NL|LP|MPC|RTL|RMS|heir|RME|ME|heirloom|honest|honor|honorable|honorarium|honorary|honorific|honour|hour|hourglass|hourly|HTML|XML|FBI|SGML|SDL|HAA|LTL|SAA|S5|FSA|SSPM)", #RoCTL
 	#excludewords => "(?:US.*|Euridyce|Euripides|Euroclydon|Eurocommunism|Eurocrat|Eurodollar|Euromarket|Europa|Europe|European|Europeanisation|Europeanise|Europeanised|Eurovision|Unix|eurhythmic|eurhythmy|euripus|one|unary|uniform|uniformally|uniformisation|uniformise|uniformitarian|uniformitarianism|uniformity|unify|unijugate|unilateral|unilateralisation|unilateralise|unilateralist|unilinear|unilingual|uniliteral|union|unique|unit|united|unity|universal|universalisation|universalise|universalism|universalist|universalistic|universality|universe|university|univocal|US|usage|useful|user|UK|uni.*|unanimous|utrees?|uni[[:alpha:]]*|util[[:alpha:]]*|usual)",
 	excludewords => "(?:US[[:alpha:]]*|Eur[[:alpha:]]*|Unix|eurhythmic|eurhythmy|euripus|one|unary|US|usage|useful|user|UK|unanimous|utrees?|uni[[:alpha:]]*|util[[:alpha:]]*|usual)",
 	s => "=", #equals starts with a vowel
@@ -403,7 +405,7 @@ Adsfasdf.
 
 #my $names="(?!Saari|Nanson|Condorcet|Borda|Fishburn|Laslier|Dodgson|Tideman)";
 my $corpnames="Intel";
-my $names="Achilles|Dam|Mally|Kant|Kamp|Burgess|Rabin|Broersen|Johnsson|Saari|Nanson|Condorcet|Borda|Fishburn|Laslier|Dodgson|Tideman|Pratt|Lei|Clarke|Emerson|Sistla|Wolper|Vardi|Schnoebelen|Turing|Broesen|$corpnames|Until|Since|Hodkinson|Dedekind|Borel|Achilles|Zeno|Zenoness|Läuchlii|Leonard|Stavi|Dedekind|Planck|Hintikka|Lange|Waldmeister";
+my $names="Hilbert|Gentzen|Xu|Priorean|Schwendimann|Achilles|Dam|Mally|Kant|Kamp|Burgess|Rabin|Broersen|Johnsson|Saari|Nanson|Condorcet|Borda|Fishburn|Laslier|Dodgson|Tideman|Pratt|Lei|Clarke|Emerson|Sistla|Wolper|Vardi|Schnoebelen|Turing|Broesen|$corpnames|Until|Since|Hodkinson|Dedekind|Borel|Achilles|Zeno|Zenoness|Läuchlii|Leonard|Stavi|Dedekind|Planck|Hintikka|Lange|Waldmeister";
 
 Rassert($nonstoppar,'we may consider probability spaces to be a pair $(\outcomes,m)$. 
 
@@ -425,13 +427,29 @@ $names="$names|Moore|Reynolds|Fisher|Wright|Muller|Belnap|Perloff";
 my $LatexLabels="(?:Example|Chapter|Lemma|Corollary|Theorem|Section)s?";
 my $inquote="(?:[^'].|.|\\s)*(?='')"; # We can be a bit more forgiving of style inside quotes as it need not match the rest of the text. Also this is a bit of a hack as it only handles double quotes.
 my $termdef="(?:(?:[[:upper:]][[:alnum:]]*|in|of|the|a|an|to|for|and)\\s+)+(?:\\\\cite[{][^}]*[}]\\s*)?[(]"; #A term definition e.g. University of Western Australia (UWA) ... actually, maybe this should be called an acronym definition. And it should probably be merged with the $acronym. Oh Well.
-my $capword="\\b(Case|Figure|Boolean|Booleans|CTAB|English|Apollo|Caen|Utilitarianism|University|(?<=the\\s)School|Ro(?:B|[(]B[)]|)CTL|(?:Society of )?Social Choice and Welfare|(?:University of )?Western Australia|Boolean|Noetherian|Pentium|Backus-Naur\\s+Form|Euclidean|Deontic\\s+S5|Robustly|Prone|Obligatory|AllPaths|Permissible|Viol|Counter-Free|Deontic S5|State-|Definitions?|Prolog|Bayesian|Voice\\s+over\\s+Internet\\s+Protocol|Internet|Denial[- ]of[- ]Service|Contrary-to-Duty|Modus|Necessitation|Wolter|$names|$LatexLabels|Drinkers'? [Pp]aradox|Distribution|Substitution|Obligatory|McCabe|Streett|Dansted|AllPath|Allpath|Next|Until|Computation|Pair-RoCTL|State-RoCTL|Saul|Hughes|Cresswell|Kripke|[[:upper:]]|(?:[[:upper:]][[:lower:]]+(?:\\s|-)+)+.$acronym|$acronym|[[:upper:]][[:lower:]]*,?\\s+[[:upper:]][[:lower:]]*|$day|$termdef|$inquote|Australia|Dr|Prof|Pawsey|Canberra|Greek|First-order Monadic|Until operator|Untils|Table|Conjecture|EXPTIME)\\b";
+my $capword="\\b(SSPM|Case|Figure|Algorithm|Boolean|Booleans|CTAB|English|Apollo|Caen|Utilitarianism|University|(?<=the\\s)School|Ro(?:B|[(]B[)]|)CTL|(?:Society of )?Social Choice and Welfare|(?:University of )?Western Australia|Boolean|Noetherian|Pentium|Backus-Naur\\s+Form|Euclidean|Deontic\\s+S5|Robustly|Prone|Obligatory|AllPaths|Permissible|Viol|Counter-Free|Deontic S5|State-|Definitions?|Prolog|Bayesian|Voice\\s+over\\s+Internet\\s+Protocol|Internet|Denial[- ]of[- ]Service|Contrary-to-Duty|Modus|Necessitation|Wolter|$names|$LatexLabels|Drinkers'? [Pp]aradox|Distribution|Substitution|Obligatory|McCabe|Streett|Dansted|AllPath|Allpath|Next|Until|Computation|Pair-RoCTL|State-RoCTL|Saul|Hughes|Cresswell|Kripke|[[:upper:]]|(?:[[:upper:]][[:lower:]]+(?:\\s|-)+)+.$acronym|$acronym|[[:upper:]][[:lower:]]*,?\\s+[[:upper:]][[:lower:]]*|$day|$termdef|$inquote|Australia|Dr|Prof|Pawsey|Canberra|Greek|First-order Monadic|Until operator|Untils|Table|Conjecture|EXPTIME)\\b";
 
 #Use of both proof-theory and proof theory.
 
+my $s='(?:\n|\s)';
 #--------------#
 my @ErrorTypes=(
  #["Error Name",	"(err[[:space:]]*or.)",	"",  "Error Description"],
+#SimpleRule("satisfiable"),
+SimpleRule("spelt correctly", "spelled correctly"), #Make Americans Happy.
+SimpleRule("never-the-less", "nevertheless"),
+SimpleRule("the automata", "the automaton"),
+SimpleRule("but and", "but"),
+SimpleRule("in terms on the", "in terms of the"),
+SimpleRule("in terms if the", "in terms of the"),
+SimpleRule("psuedo", "pseudo"),
+SimpleRule("visa-versa", "vice versa"),
+SimpleRule("visa versa", "vice versa"),
+SimpleRule("that the exists", ""),
+SimpleRule("our selves", "ourselves"),
+SimpleRule("number of reason","number of reasons"), 
+SimpleRule("the both","both"), 
+SimpleRule("we will shown","we show"), 
 SimpleRule("this important because","this is important because"), 
 SimpleRule("not contains","not contain"), 
 SimpleRule("we interested","we are interested"), 
@@ -460,10 +478,10 @@ SimpleRule("a conservative extensions","a conservative extension"),
 SimpleRule("be use to","be used to"), 
 SimpleRule("enquire as how",""), 
 SimpleRule("model checker CTL","model checker for"), 
-SimpleRule("can efficient","model checker for"), 
+SimpleRule("can efficient",""), 
 SimpleRule("polynomial model checking","polynomial-time model checking"), 
 SimpleRule("greater motivation","stronger motiviation"), 
-SimpleRule("As will","As with"), 
+#SimpleRule("As will","As with"),  #False Positive: As will be shown...
 SimpleRule("may first appear","may at first appear"), 
 SimpleRule("comparision to","comparision with"), 
 SimpleRule("comparisions to","comparisions with"), 
@@ -485,8 +503,9 @@ SimpleRule("sch that", "such that"),
 #["as follows.", "as follows[.]", '', 'Perhaps you should replace the "." with a ":".'], #Recommended by Tim French
 #SimpleRule("we know", "we have"), #Recommended by Mark Reynolds, as more formal in a proof (Personal Rule)
 SimpleRule("presented at", "presented in"), #Recommended by Tim French, also Google reports "present in" [conference] being twice as common as "presented at"
-SimpleRule("suited for", "suited to"), #Recommended by Tim French (or maybe Mark Reynolds?)
-SimpleRule("tableau are", "tableaux are"), #Personal
+#I don't think there is a hard and fast rule as to when to use for or to
+#SimpleRule("suited for", "suited to"), #Recommended by Tim French (or maybe Mark Reynolds?)
+SimpleRule(" (?<!in.the.)tableau are", "tableaux are"), #Personal
 #SimpleRule("variables?", "atom"), #Personal
 SimpleRule("formally reason these", "formally reason about these"), 
 SimpleRule("to presented", "presented"), 
@@ -496,20 +515,22 @@ SimpleRule("on of", "one of"),
 SimpleRule("must exists", "must exist"), 
 SimpleRule("see e.g.", "see for example"), # recommended by Tim French
 SimpleRule("world formula(?:[es])?", "State formula"), 
-SimpleRule("For example(?!,)","For example,"), # source: http://owl.english.purdue.edu/owl/resource/607/02/
+SimpleRule("For example(?![,:])","For example,"), # source: http://owl.english.purdue.edu/owl/resource/607/02/
 #SimpleRule(", that","that"), # source: http://owl.english.purdue.edu/owl/resource/607/02/
 SimpleRule("there no","there is no"),
 SimpleRule("show that is [^\\s]+ satisfiable","show that ___ is satisfiable"),
-SimpleRule("define (an? [^\\s]+) [^\\s]+ be \\2"),
+#SimpleRule("define (an? [^\\s]+) [^\\s]+ be \\2"),
 SimpleRule("a special atoms"),
 #["singular both", "[Bb]oth\\s+(?:[^.](?!s\\s|\\band\\b))*[.]", '', "You use both, which implies two items but I don't see 'and' or a plural"],
 #["Empty mathblock", "$start_math_char $end_math_char", '', ""], 
+["Two Pretty", '(section|Section|theorem|Theorem|Lemma|lemma|Chapter|chapter|Proposition|proposition|corollary|Corollary|fact|Fact) \\\\prettyref', "If you use prettyref you probably don't also need ARG1. ", ''], #Doesn't work
 ["Either ... and", '[Ee]ither\s+\w+\s+and', "", ''], #Doesn't work
 ["Plural Mismatch (as)", "s(?<!is)\\s+as\\s+a\\b", "", ''], #Doesn't work
 ["pspace-compLete", "(NP|PSPACE)[- ][Cc]ompete", "", ''], #Doesn't work
 ["Bad plural", "A B?CTL[- ][Ss]tructures", "", ''], #Doesn't work
-#["A plural", "([Aa]n?)\\s+(?!(?:athletics|basis|bias|dais|diabetes|dialysis|emphasis|gas|iris|lens|mantis|mathematics|news|physics|seriesx|yes))[[:lower:]]*([^us]s)\\b", "", 'You used ARG1, but words that end in ARG2 are usually plurals'], #Doesn't work
-["A plural", '\b([Aa]n?)\s+(?!(?:athletics|basis|bias|dais|diabetes|dialysis|emphasis|gas|iris|lens|mantis|mathematics|news|physics|series|yes))[[:lower:]]*((?![us])[[:lower:]]s)\b', "", 'You used ARG1, but words that end in ARG2 are usually plurals'], #Doesn't work
+#["A plural", "([Aa]n?)\\s+(?!(?:athletics|basis|bias|dais|diabetes|dialysis|emphasis|gas|iris|lens|mantis|mathematics|news|physics|seriesx|yes))[[:lower:]]*([^usi]s)\\b", "", 'You used ARG1, but words that end in ARG2 are usually plurals'], #Doesn't work
+["A plural", '\b([Aa]n?)\s+(?!(?:athletics|basis|bias|dais|diabetes|dialysis|emphasis|gas|iris|lens|mantis|mathematics|news|physics|series|yes))[[:lower:]]*((?!ics)[[:lower:]](?![ius])[[:lower:]]s)\b', "", 'You used ARG1, but words that end in ARG2 are usually plurals'], #Doesn't work
+#["A plural", '\b([Aa]n?)\s+es|dialysis|emphasis|gas|iris|lens|mantis|mathematics|news|physics|series|yes))*([[:lower:]][[:lower:]]s)\b', "", 'You used ARG1, but words that end in ARG2 are usually plurals'], #Doesn't work
 #["A plural", '\b([Aa]n?)\s+[[:lower:]]*(s)[ .\n]', "", 'You used ARG1, but words that end in ARG2 are usually plurals'], #Doesn't work
 #["No fullstop.", "^.*[^.]\$", '', ""], #Doesn't work
 ["Empty mathblock", "$start_math_char  *$end_math_char", '', ""], 
@@ -552,12 +573,12 @@ SimpleRule("a special atoms"),
 ["Personal Rule: valdities", "[Vv]aliditi(?:y|ies)", "", "I mean something like 'valid in'"],
 ["blow up", "[Bb]low\\s+up", "", "You may want to join these into a single word 'blowup'"],
 ["it self", "[Ii]t\\s+self", "", "You may want to join these into a single word 'itself'"],
-["Personal Rule: equivalence", "quivalence", "", "I might mean truth-preserving instead"],
+#["Personal Rule: equivalence", "quivalence", "", "I might mean truth-preserving instead"],
 ["Personal Rule: ROCTL", "ROCTL", "", "I should write RoCTL instead"],
 ["is was", "\\b[Ii]s\\s+was\\b", "", "It is unusual to see 'is' and 'was' together. Maybe you only need one of these two words here?"],
 # Has lots of false positives in titles:
 ["Captial without preceeding fullstop", "(?!(?:on|of|to|with)\\b)(?:$lowerword|ref[{][^{}]*[}]),?:?(?:(%.*\n)|\\s)+(?!$capword)([[:upper:]][[:alnum:]]*)", "erase:(?:\\\\(?:chapter|(?:sub)*section[*]?$recursive_brace)|$mathblock)", "ARG2~CAP, 1;ARG1, 2;ARG2"],
-["Captial 'In' without preceeding fullstop", "[[:lower:]],?\\s+In\\b", "erase:(?:\\\\(?:chapter|(?:sub)*section[*]?[{](?:[^}]|[{][^}]*[}])*[}])|$mathblock)", '"In" can be the code for the element "Indium", in which case it should be captialised but usually it is "in" as an "inside" and should not be captialised unless it is the beginning of a sentance.'],
+["Captial 'In' without preceeding fullstop", "[[:lower:]](?<!\\\\item)(?<!iffalse),?\\s+In\\b", "erase:(?:\\\\(?:chapter|(?:sub)*section[*]?[{](?:[^}]|[{][^}]*[}])*[}])|$mathblock)", '"In" can be the code for the element "Indium", in which case it should be captialised but usually it is "in" as an "inside" and should not be captialised unless it is the beginning of a sentance.'],
 ["In Practise", "[Ii]n practise", "", "In UK english \`practise' is verb and \`practice' is a noun. In US English \`practice' is used for both forms. Either way, I think you mean \`in practice'."],
 ["Empty Begin/End Block", "\\\\begin[{][^}]+[}]\\s*(?:\\\\par)?\\\\end[{][^}]*[}]", "Perhaps you mean *is* thus a?"],
 ["it thus a", "it\\s+thus\\s+a", "Perhaps you mean *is* thus a?"],
@@ -623,7 +644,7 @@ SimpleRule("a special atoms"),
 ["Use of A where An is expected",	'\b[Aa]\s+('.$VowelSound.')',	"", 'A should only be used before words that do not start with a vowel sound (usually A,E,I,O or U), but ARG1 begins with vowel sound.'],
 ["Use of the and 's",	'\\b[Tt]he\\s+[[:upper:]][[:lower:]]*\'s',	"", "You should use the or 's, not both"],
 ["Sentance must begin with capital letter",	'(?<!\..)\.\s+[[:lower:]]',	"", ""],
-["No space before math block",	"[[:alnum:]]$start_math(?![_^])",	"", ""],
+["No space before math block",	"[[:alnum:]]$start_math(?![_^]|\\\\.dots)",	"", ""],
 ["No space before citation",	"[^[:space:](~]\\\\cite",	"", ""],
 #["Number of (singular)",	"[Nn]umber\\s+of\\s+[[:alnum:]]+[^s\\s]\\b",	"", ""],
 ["Capital following comma",	",\\s*(?!b|$names|Coomb|Hare\\b|Marquis\\b||Khachian\\b|Dominating\\s+Set\\b\\b|Impartial\\s+Culture\\b)[[:upper:]][[:lower:]]",	'Remove capitals from beginning of ARG1', ""],
@@ -632,25 +653,25 @@ SimpleRule("a special atoms"),
 ["Footnote is not fullstop",   "[[:alnum:],]\\s*\\\\footnote$recursive_brace\\\\s*[[:upper:]]",'',''],
 ["Footnote is not fullstop",   "[[:alnum:],](\\s|%
 )*\\\\footnote$recursive_brace\\s*[[:upper:]]",'',''],
-["No space after math block",	'(?!..sim)'.$mathblock.'(?!s\s)[[:alnum:]]',	"..sim", ""],
+["No space after math block",	'(?!..sim)'.$mathblock.'(?<!dots.)(?!s\s)[[:alnum:]]',	"..sim", ""],
 ["No space before macro",	"[[:alnum:]]$macroblock",	"", ""],
 ["No space after macro",	$macroblock.'[[:alnum:]]',	"", ""],
 ["A used for plural",	'\\b[Aa]\\s+sequences\\b',	"", ""],
 #["Comma following footnote",	'\\\\footnote[{][^}]*[}],',	"", ""],
-["Use of : in math-mode",	$start_math_char.'[^'.$end_math_char.']*(?<![\\\\]):',	"", "LaTeX assumes a : in mathmode means division, if you are trying to define a function, you should use \\colon instead."],
+["Use of : in math-mode",	$start_math_char.'[^'.$end_math_char.']*(?<![\\\\])[[:alpha:]]:',	"", "LaTeX assumes a : in mathmode means division, if you are trying to define a function, you should use \\colon instead."],
 ["less that",	'\\bless\\s+that\\b',	"", ""],
 ["Ugly fraction",		"([[:digit:]])/([[:digit:]])(?!n[}])(?!_home)",	"erase:\\\\url$recursive_brace", "Use \\nicefrac\{ARG1\}\{ARG2\} instead"],
 ["Too many zeros without a comma",		"(?<!.)0000(?![^\\s]*[.]tex[}])",	"", "You should put a comma in there somewhere"],
 ["Split word","(?:[Ww]ith out|[Ll]ike wise)","ARG1 is a single word", ""],
 ["Duplicated Words",	'(?i)\b([[:alpha:]]+)\b[,.;]?\s+\b\2\b'.$notinmath,	'ARG1 occurs twice.', ""],
-["Duplicated Words (broken)",	'(?i)\b(?!more\s+and|sets\s+of|that\s+|is\s+|may\s+or|does\s+or\s+does\s+not|neck\s+and\s+neck|as\s+well\s+as|(?:as|of|to)\s)([[:alpha:]]+)\s+(?!to)[[:alpha:]]+\s+\2\b(?![{-])',	'ARG1 occurs twice.', ""],
+["Duplicated Words (broken)",	'(?i)\b(?![[:alpha:]]+\s+by|more\s+and|sets\s+of|that\s+|is\s+|may\s+or|does\s+or\s+does\s+not|neck\s+and\s+neck|as\s+well\s+as|(?:as|of|to)\s)([[:alpha:]]+)\s+(?!to)[[:alpha:]]+\s+\2\b(?![{-])',	'ARG1 occurs twice.', ""],
 ["Use of I.e.",	'I\\.e\\.',	'At the beginning of a sentance you should use "That is" rather than "I.e."',''],
 #["Use of E.g.",	'E\\.g\\.',	'At the beginning of a sentance you should use "For example" rather than "E.g."',''],
 ["Use of \"we could\".",	'\\b([Ww]e\\s+c(?:an|ould))(?>!\\s+say)\\b', '',	'In formal text, we should not use ARG1 as it implies you cannot'],
 ["No space between sentances",	'[[:lower:]]\\.[[:upper:]](?![^\\s]*[.]tex[}])', '',	''],
 #["Use of \"we could\".",	'\\b[Ww]e\\s+c(?:an|ould)\\b',	'In formal','XXX'],
 ["Missing hyphen after math block",	"$end_math\\s+(multinomial|Bernoulli|dimensional|binomial|probability)","", 'Add a hyphen before ARG1' ],
-["Paragraph should end in fullstop","[[:alnum:]](?<!iffalse)(?<!maketitle)(?<![\\\\]fi)[[:space:]]*\n\n",	"", ""],
+["Paragraph should end in fullstop","[[:alnum:]](?<!iffalse)(?<!maketitle)(?<!medskip)(?<!hline)(?<![[:upper:]]{3})(?>!\\\\else)(?<![\\\\]fi)[[:space:]]*\n\n",	"", ""],
 ["Paragraph should start with captial",$par."[[:lower:]]",	"", ""],
 ["Paragraph starts with fullstop?",$par."\\.",	"", ""],
 ["Place punctuation outside mathmode",".([,.:?])$end_math",	"", "Move ARG1 out of math mode"],
@@ -674,7 +695,7 @@ SimpleRule("a special atoms"),
 ["Lemma label without 'lem:'",	"\\\\begin[{]lem[}]\\s+\\\\label[{](?!lem:)", "", 'If you start a Lemma label without lem, prettyref can get confused.'],
 ["Corollary label without 'cor:'",	"\\\\begin[{]cor[}]\\s+\\\\label[{](?!cor:)", "", 'If you start a Lemma label without lem, prettyref can get confused.'],
 ["Theorem label without 'thm:'",	"\\\\begin[{]thm[}]\\s+\\\\label[{](?!thm:)", "", 'If you start a Lemma label without lem, prettyref can get confused.'],
-["Lack of Lemma prefix",	"\\b(?!Lemma)[^\\s~]+[~\\s]+\\\\ref[{]lem:","",""],
+["Lack of Lemma prefix",	"\\b(?!Lemma|and)[^\\s~]+[~\\s]+\\\\ref[{]lem:","",""],
 ["Lack of Corollary prefix",	"\\b(?!Corollary)[^~\\s]+[~\\s]+\\\\ref[{]cor:","",""],
 ["Lack of Theorem prefix",	"\\b(?!Theorem|and)[^\\s~]+[~\\s]+\\\\ref[{]thm:","",""],
 ["Use of lowercase reference",	"(lemma|theorem|table|figure|corollary)[~ ]\\\\ref\\b", "", 'The first letter of ARG1 should be capitalised to adhere to the LaTeX \\prettyref standard.'],
@@ -684,7 +705,7 @@ SimpleRule("a special atoms"),
 ["Empty Footnote","\\\\footnote[{](\\s|\n)*[}]","","There is a footnote with nothing in it. Perhaps you should remove it"],
 #["Attempt to Pluralize a name","(\\bSaari|Nanson|Condorcet|Borda|Fishburn|Laslier|Dodgson|Tideman)s\\b","","ARG1 is someone's name, so the plural (s) doesn't really make sense. Maybe you meant the possessive ('s) instead?"],
 ["Attempt to Pluralize a name","(\\b$names)s\\b","","ARG1 is someone's name, so the plural (s) doesn't really make sense. Maybe you meant the possessive ('s) instead?"],
-["Unraised 'c' in 'Mc'",	"\\b(?<!/)(?<!cite[{])Mc[[:upper:]]", "", "The 'c' in 'Mc' should be a raised character."],
+["Unraised 'c' in 'Mc'",	"\\b(?<![/,])(?<!cite[{])Mc[[:upper:]]", "", "The 'c' in 'Mc' should be a raised character."],
 ["Section ending with '.'","\\\\(?:sub)*section[{].*[.][}](?:\n|\$)","","It is unusual to have a section that ends with '.'"],
 ["Forge(t) to",	'\bforge\s+to\b', "", 'Perhaps you meant "Forget to".'],
 ["May the",	'\b[Ww]e\s+may\s+the\b', "", 'This is odd.'],
@@ -692,7 +713,8 @@ SimpleRule("a special atoms"),
 ['$ discuss',	$end_math.' [Dd]iscuss', "", 'This is odd.'],
 ["He vs the", '\b[Hh]e (?:full)?path\b', 'Perhaps you meant "the".'],
 ["The we", '\b[Tt]he\s+we\b', 'Perhaps you meant "the".'],
-["Saace before \\label", '(?<!\\\\item) \\\\label', "", "You should delete spaces before labels to maintain correct page references"], #ChKTeX error 24 
+#Should return:
+#["Saace before \\label", '(?<!\\\\item) \\\\label', "", "You should delete spaces before labels to maintain correct page references"], #ChKTeX error 24 
 ["Use of however without comma", '[;.]\\s+[Hh]owever(?!,)', "", "Some suggest only using however to start a sentance, or afer a semi-colon, and that it should be followed with a comma."], 
 ["Is be", '\b[Ii]s\s+be\b', "", "use of Is and be together usually indicates trouble."], 
 ["It represent", '\b[Ii]t\s+represent\b', "", "Prehaps you meant \"It representS\"?"], 
@@ -701,12 +723,13 @@ SimpleRule("a special atoms"),
 ["Be is", '\b[Bb]s\s+is\b', "", "use of Is and be together usually indicates trouble."], 
 
 # The following rule generates lots of false positives in titles
-["Inappropriate Title Capital", '[[:alnum:]](?<!\\\\item)\s+(A|An|The|For|And|Nor|But|Or|Yet|For|From|Of|On|To|With)\b\s+[[:alnum:]]'.$notinmath, "", "Used a capital for ARG1, but not first or last word in a title."], 
+["Inappropriate Title Capital", '[[:alnum:]](?<!\\\\item)(?<![[:upper:]]{3})(?<!\\\\em)(?<!\\\\fi)\s+(A|An|The|For|And|Nor|But|Or|Yet|For|From|Of|On|To|With)\b\s+[[:alnum:]]'.$notinmath, "", "Used a capital for ARG1, but not first or last word in a title."], 
 #["Empty section",	'\\\\(?:sub)*section\\{\\}', "", 'Empty section.'],
 #["Elements of vectors are usually not a vectors","vctr[{][^{}1]*[}]_[{]?[[:digit:][:lower:]]","",""],
 #["Personal rule -- add apostrophy before s","\\b(Dodgson|Simpson|Tideman)s[']?\\s+[rR]ule","","This is a personal rule I use, I should have disabled it before I published a new version. Sorry."],
 #["Replace O with \\bigO","[^dg]O[(]","","This is a personal rule I use, I should have disabled it before I published a new version. Sorry."],
 ["Personal rule - I probably mean Spatial","pacial","",""],
+["Personal rule - I probably through","(path|paths|sigma.|pi.)$s+though","",""],
 ["Personal rule - structure OR CTL-model","tructure CTL-model","",""],
 #["Personal rule - I probably mean fullpath","\\bpath\\b(?! operator)(?!-quantif)(?! \\\\formulae)","",""],
 ["Personal rule - I probably mean abbreviation",'\\bshort[- ]?hand\\b',"",""],
@@ -724,7 +747,14 @@ SimpleRule("a special atoms"),
 ["Space before )",$end_math."[^".$start_math."]*\\s\\)", "", ""],
 ["Converge [to] the",'onverge\s+the.', "", ""],
 ["use or used", '\b[Uu]se\s+[^.;]*is used\b', "", "You used both 'use' and 'is used' in the same sentance. This may indicate that you tried to do something silly like 'We use X is used to Y'."], 
-["Personal rule - remove the i","[Aa]utomation","",""]
+["Lonely End Proof",$par.'[\\\\]end{proof}', "", "You should probably delete the paragraph break before the \\end{proof}"], 
+["Paragraph following COLON",":\\s*$par\\s*[\\\\]begin{(?:eqnarray|align)", "", "You should probably delete the paragraph break after the COLON"], 
+["Personal rule - remove the i","[Aa]utomation","",""],
+["no full stop at end of definition","[[:alnum:]$end_math]".'\s*.end{definition}',"",""],
+#["[^t][^o]$s+provide a", "[^t][^o]$s+provide$s+a\b","",""],
+#["provide a", "[^o]$s+provide$s+a","",""],
+#["provide a", "[^o]$s+provide$s+a","",""],
+["no full stop at end of .*","[[:alnum:]$end_math]".'(?:\s|%[^\n]*)*.end{(?!algorithmic|enum|item|array|eqnarray|align)',"",""]
 );
 
 
@@ -896,6 +926,7 @@ my $errorline;
 my $spaceline;
 
 my %old_pars=();
+my %old_textchunks=();
 
 foreach (@blocks) {
 
@@ -912,7 +943,7 @@ foreach (@blocks) {
 
 		my $partext=$_;
 
-if (0) { #BUG: Why did I comment this out? Too many false positives?
+if (0) { #BUG: commented this out as too many false positives? Fix instead?
 
 		if ($partext =~ /\s*(?:\\par)?\s*[\\]end[{][^}]*[}]/) {
 				ReportError($OutFiles,
@@ -936,13 +967,32 @@ if (0) { #BUG: Why did I comment this out? Too many false positives?
 		if (length($partext)>80) {
 			if(defined $old_pars{$partext}){
 				ReportError($OutFiles,
-				$linenum,1,667,"Duplicated paragraph ".$linenum,
-				"This paragraph has already occured at line ".$old_pars{$partext}."\n".$partext,
+				$linenum,1,667,"Duplicated paragraph ".$old_pars{$partext},
+				#"This paragraph has already occured at line ".$old_pars{$partext}."\n".$partext,
 				,"",,$filename);
 			} else {
 				$old_pars{$partext}=$linenum;
 			}
-		}
+
+			#The following test is essentially a refinement of the duplicated par test above
+			#we should perhaps remove the par test?
+			#... but too many false positives, so remove this instead.
+		        if(0){
+			while ($partext =~ /((?:\n|.){150})[.]/g) {
+			    my $chunk=$1;
+			    #BUG: following uses line number of paragraph rather than the text chunk
+			    if(defined $old_textchunks{$chunk}){
+                                ReportError($OutFiles,
+                                $linenum,1,669,"Duplicated Chunk of Text ".$linenum,
+                                "This chunk has already occured at line ".$old_textchunks{$chunk}."\n".$chunk,
+                                ,"",,$filename);
+			    } else {
+				$old_textchunks{$chunk}=$linenum;
+			    }
+			}
+			}
+    		}
+
 		$linenum=$linenum+NumNewlines($partext)+2;
 		$old_partext=$partext;
 		
@@ -1455,10 +1505,15 @@ my %ignore_rules=(
 	COMP_THAN_2 => 1, # I really don't understand what rule COMP_THAN_2 is  
 	COMMA_PARENTHESIS_WHITESPACE => 1,
 	COMMA_PARENTHESIS_WHITESPACE => 1,
+	"EN_QUOTES[3]" => 1, # This suggests that we replace `` with Smart Quotes, but LaTeX does that for us
 	DOUBLE_PUNCTUATION => 1);
 
+$ignore_rules{'ENGLISH_WORD_REPEAT_BEGINNING_RULE'} = 1; #Can't be bothered fixing these really.
+$ignore_rules{'IN_A_X_MANNER[1]'} = 1; #I think "in a similar way" is valid and useful english
 $ignore_rules{'CURRENCY[1]'} = 1;
+$ignore_rules{'CURRENCY_SPACE[1]'} = 1;
 $ignore_rules{'EN_QUOTES[2]'} = 1; # Complains about e.g. B\"uchi
+$ignore_rules{'BIG_IN_SIZE[1]'} = 1; # ... IN casual writing, "Exponential in Length" may be unnecessarily wordy, but in scientific writing it means something very different to, say "quadratic in volume". It is not just unnecessary verbage as LanguageTool suggests. 
 
 my %ignore_regexs=(
 	POSSESIVE_APOSTROPHE => "worlds",

@@ -2,6 +2,11 @@
 #rules removed. It probably isn't much use for checking french yet.
 #Also we may have to pass a special flag to LanguageTool.
 
+# Format:
+# SimpleRule("Error", "Corrected (optional)"),
+#       OR
+# ["Error Name:", "Error Regex", '', 'Extra Description'], 
+
 my $s='(?:\n|\s)';
 our @ErrorTypes=(
  #["Error Name",	"(err[[:space:]]*or.)",	"",  "Error Description"],

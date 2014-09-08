@@ -4,17 +4,25 @@
 export LANG=en_AU.UTF-8
 export ORIG_CHKTEX=`which chktex`
 
-if echo "$0" | grep '^/' > /dev/null
-then
-	newpath=path/"$0"
-else 
-	newpath=`pwd`/path/"$0"
+
+#if we used a symbolic link, retrieve the real script location
+if [ -h $0 ]; then
+    LYXGC_PATH=$(dirname $(readlink $0))
+else
+	LYXGC_PATH=$(cd "$(dirname "$0")" && pwd)
 fi
-newpath=`echo "$newpath" | sed 's/\/[^\/]*$//g'`
-export PATH=$newpath:$PATH
+LYXGC_PATH=$LYXGC_PATH"/path"
+
+# just a security: if folder 'path' does not exist, abort
+if [ ! -d "$LYXGC_PATH" ]; then
+	echo "Folder $LYXGC_PATH does not exist, invalid installation. Please see to https://github.com/gmatht/lyx-gc/"
+	exit 1
+fi
+
+export PATH=$LYXGC_PATH:$PATH
 echo Path used by lyx is: $PATH
-if test -z "$LYX"
-	then echo b 
+if test -z "$LYX";then
+	echo b
 	LYX=`which i786-pc-linux-gnu-lyx lyx-qt lyx-xforms lyx | head -n1`
 fi
 #export LYX_VERSION=`$LYX --version 2>&1 | grep Frontend: | sed 's/^ *Frontend: */g/head -n1`

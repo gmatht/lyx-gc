@@ -13,7 +13,7 @@ else
 fi
 LYXGC_PATH=$LYXGC_PATH"/path"
 
-# just a security: if folder 'path' does not exist, abort
+#if LYXGC_PATH directory does not exist, abort
 if [ ! -d "$LYXGC_PATH" ]; then
 	echo "Folder $LYXGC_PATH does not exist, invalid installation. Please see to https://github.com/gmatht/lyx-gc/"
 	exit 1
@@ -25,10 +25,7 @@ if test -z "$LYX";then
 	echo b
 	LYX=`which i786-pc-linux-gnu-lyx lyx-qt lyx-xforms lyx | head -n1`
 fi
-#export LYX_VERSION=`$LYX --version 2>&1 | grep Frontend: | sed 's/^ *Frontend: */g/head -n1`
-#export LYX_GUI=`$LYX --version 2>&1 | grep Frontend: |  egrep -o -i '(qt|xforms|gtk)'`
 export LYX_GUI=qt
-#echo GUI: $LYX_GUI
 echo "$LYX" "$@"
 #valgrind "$LYX" "$@"
 "$LYX" "$@"

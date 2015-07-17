@@ -1,3 +1,88 @@
+##############################################################################
+sub GenerateErrorTypes {
+our $endnumber='(?=[^[:digit:]]|$)'; 
+our $funnynumber="(?:11|18)(?:[[:digit:]]{2})?(?:[[:digit:]]{3})*$endnumber"; # e.g. Eighteen(vowel), not One Eight.
+our $vowelnumber='\b'."(?:8[[:digit:]]*$endnumber|$funnynumber)";
+our $consonantnumber='\b(?!'.$funnynumber.")[012345679][[:digit:]]*$endnumber";
+
+Rassert($consonantnumber,"1800 180 a 8 2","180,2");
+
+# include words & exclude words below borrowed from JLanguageTool, Copyright (C) 2005 Daniel Naber, licensed under LGPL.
+my %SetOfVowels = (
+	l => "aeiou", # lower case vowels
+	U => "FHILMANXAEIOS", #upper case vowels i.e. F=eff which is a vowel
+	d => "8", #vowels that are digits
+	number=> $vowelnumber,
+	includewords  => "(?:MF|NP|NL|LP|MPC|RTL|RMS|heir|RME|ME|heirloom|honest|honor|honorable|honorarium|honorary|honorific|honour|hour|hourglass|hourly|HTML|XML|FBI|SGML|SDL|HAA|LTL|SAA|S5|FSA|SSPM)", #RoCTL
+	#excludewords => "(?:US.*|Euridyce|Euripides|Euroclydon|Eurocommunism|Eurocrat|Eurodollar|Euromarket|Europa|Europe|European|Europeanisation|Europeanise|Europeanised|Eurovision|Unix|eurhythmic|eurhythmy|euripus|one|unary|uniform|uniformally|uniformisation|uniformise|uniformitarian|uniformitarianism|uniformity|unify|unijugate|unilateral|unilateralisation|unilateralise|unilateralist|unilinear|unilingual|uniliteral|union|unique|unit|united|unity|universal|universalisation|universalise|universalism|universalist|universalistic|universality|universe|university|univocal|US|usage|useful|user|UK|uni.*|unanimous|utrees?|uni[[:alpha:]]*|util[[:alpha:]]*|usual)",
+	excludewords => "(?:US[[:alpha:]]*|Eur[[:alpha:]]*|Unix|eurhythmic|eurhythmy|euripus|one|unary|US|usage|useful|user|UK|unanimous|utrees?|uni[[:alpha:]]*|util[[:alpha:]]*|usual)",
+	s => "=", #equals starts with a vowel
+	isvowelset => 1 # Is a set of vowels
+);
+
+
+my %SetOfConsonants = (
+	l => setDiff("abcdefghijklmnopqrstuvwxyz",$SetOfVowels{"l"}),
+	U => setDiff("ABCDEFGHIJKLMNOPQRSTUVWXYZ",$SetOfVowels{"U"}),
+	d => setDiff("0123456789",$SetOfVowels{"d"}),
+	number => $consonantnumber,
+	includewords=>$SetOfVowels{"excludewords"},
+	excludewords=>$SetOfVowels{"includewords"},
+	s => '+-<>#', # These symbols all sound like consonants
+ 	isvowelset => 0 # Is not a set of vowels
+);
+
+my $VowelSound=GenerateVowelRegex(\%SetOfVowels);
+
+my $ConsonantSound=GenerateVowelRegex(\%SetOfConsonants);
+
+
+#my $AlwaysUpperWord="Khachian"; 
+
+Rassert($ConsonantSound,'apple Apple pear X-ray 1800 180 0','pear,ray,180,0');
+Rassert($VowelSound,'apple Apple pear X-ray 1800 180 0','apple,Apple,X,1800');
+Rassert("An $ConsonantSound",'An \$500 An \$1800','An \$500');
+## OK, we have generated important information on vowels, now we can generate our error list.
+
+#my $nonstoppar='(?<!'.$fullstop.')(?<!\\\\|\}|\{|\\n|\s|\?|[:]|\])(?<=.)\s*(?='.$par.')';
+#I don't know why we need the "~" below.
+my $nonstoppar='(?<!'.$fullstop.'|\\s|~|!|[)]|;)\\s*(?<!\\\\|\}|\{|\\n|\s|\?|[:]|\])(?<=.)\s*(?='.$par.')';
+
+Rassert($nonstoppar,"aasdsd.","");
+Rassert($nonstoppar,"aasdsd}","");
+Rassert($nonstoppar,"aasdsd\\","");
+Rassert($nonstoppar,"aasdsd","EMPTYSTR");
+Rassert($nonstoppar,"dfasfdas
+
+Asdfadsafsd
+
+Adsfasdf.
+",",");
+
+#my $names="(?!Saari|Nanson|Condorcet|Borda|Fishburn|Laslier|Dodgson|Tideman)";
+my $corpnames="Intel";
+my $names="Hilbert|Gentzen|Xu|Priorean|Schwendimann|Achilles|Dam|Mally|Kant|Kamp|Burgess|Rabin|Broersen|Johnsson|Saari|Nanson|Condorcet|Borda|Fishburn|Laslier|Dodgson|Tideman|Pratt|Lei|Clarke|Emerson|Sistla|Wolper|Vardi|Schnoebelen|Turing|Broesen|$corpnames|Until|Since|Hodkinson|Dedekind|Borel|Achilles|Zeno|Zenoness|Läuchlii|Leonard|Stavi|Dedekind|Planck|Hintikka|Lange|Waldmeister";
+
+Rassert($nonstoppar,'we may consider probability spaces to be a pair $(\outcomes,m)$. 
+
+The function.',"");
+
+# Format of an error type: 
+# [ErrorName, ErrorRegex, Reserved, ErrorDescription]
+# Also note that the text is partially tokenized so you will have to use $start_math or $end_math in place of "$"
+
+# perl -e '$x = "ab"; if ($x =~ /(?<!c)b/) { print "yes\n" };'
+my $acronym="\\b(?:[[:upper:]][[:alpha:]]*[[:upper:]][[:alpha:]]*|[[:upper:]][[:alnum:]]*[[:upper:]0-9][[:alnum:]]*)\\b";
+my $lowerword="\\b(?<!\\\\)[[:lower:]]+\\b";
+
+my $titletype="\\\\(?:chapter|(?:sub)*section)[[]";
+#my $notitle="^(?:(?!$titletype).)*";
+#my $notitle=".*";
+my $day="(?:Monday|Tuesday|Wednesday|Thursday|Friday)";
+$names="$names|Moore|Reynolds|Fisher|Wright|Muller|Belnap|Perloff";
+my $LatexLabels="(?:Example|Chapter|Lemma|Corollary|Theorem|Section)s?";
+my $inquote="(?:[^'].|.|\\s)*(?='')"; # We can be a bit more forgiving of style inside quotes as it need not match the rest of the text. Also this is a bit of a hack as it only handles double quotes.
+
 my $termdef="(?:(?:[[:upper:]][[:alnum:]]*|in|of|the|a|an|to|for|and)\\s+)+(?:\\\\cite[{][^}]*[}]\\s*)?[(]"; #A term definition e.g. University of Western Australia (UWA) ... actually, maybe this should be called an acronym definition. And it should probably be merged with the $acronym. Oh Well.
 my $capword="\\b(SSPM|Case|Figure|Algorithm|Boolean|Booleans|CTAB|English|Apollo|Caen|Utilitarianism|University|(?<=the\\s)School|Ro(?:B|[(]B[)]|)CTL|(?:Society of )?Social Choice and Welfare|(?:University of )?Western Australia|Boolean|Noetherian|Pentium|Backus-Naur\\s+Form|Euclidean|Deontic\\s+S5|Robustly|Prone|Obligatory|AllPaths|Permissible|Viol|Counter-Free|Deontic S5|State-|Definitions?|Prolog|Bayesian|Voice\\s+over\\s+Internet\\s+Protocol|Internet|Denial[- ]of[- ]Service|Contrary-to-Duty|Modus|Necessitation|Wolter|$names|$LatexLabels|Drinkers'? [Pp]aradox|Distribution|Substitution|Obligatory|McCabe|Streett|Dansted|AllPath|Allpath|Next|Until|Computation|Pair-RoCTL|State-RoCTL|Saul|Hughes|Cresswell|Kripke|[[:upper:]]|(?:[[:upper:]][[:lower:]]+(?:\\s|-)+)+.$acronym|$acronym|[[:upper:]][[:lower:]]*,?\\s+[[:upper:]][[:lower:]]*|$day|$termdef|$inquote|Australia|Dr|Prof|Pawsey|Canberra|Greek|First-order Monadic|Until operator|Untils|Table|Conjecture|EXPTIME)\\b";
 
@@ -328,3 +413,18 @@ SimpleRule("a special atoms"),
 #["provide a", "[^o]$s+provide$s+a","",""],
 ["no full stop at end of .*","[[:alnum:]$end_math]".'(?:\s|%[^\n]*)*.end{(?!algorithmic|enum|item|array|eqnarray|align)',"",""]
 );
+
+
+
+open(DEBUG_ERROR_TYPES, ">DEBUG_ERROR_TYPES.latexgc") or die "Can't open ".our $filename.".texp for writing: $!";
+foreach (@ErrorTypes){
+	print DEBUG_ERROR_TYPES $new_error_type.join(chr(0),@$_)."\n";
+}
+close(DEBUG_ERROR_TYPES);
+
+Rassert('\b([[:alpha:]]+)\b\s+\b\1\b',' det det fab ','det');
+
+return (@ErrorTypes);
+}
+
+

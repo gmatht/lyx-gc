@@ -1,3 +1,4 @@
+sub GenerateErrorTypes {
 #This is presently just chktex_en.pl with most of the obviously english only
 #rules removed. It probably isn't much use for checking french yet.
 #Also we may have to pass a special flag to LanguageTool.
@@ -50,6 +51,7 @@ our @ErrorTypes=(
 ["Signe égal '=' en dehors d'un block de math",	$mathblock.'\s*=\s*'.$mathblock,"", 'Le signe égal \'=\' devrait peut-être se trouver à l\'intérieur du block de math ?'],
 ["Pas d'espace avant un block de math",	"[[:alnum:]]$start_math(?![_^]|\\\\.dots)",	"", ""],
 ["Pas d'espace avant une citation",	"[^[:space:](~]\\\\cite",	"", ""],
+sub GenerateErrorTypes {
 ["Majuscule après virgule",	",\\s*(?!b|$names|Coomb|Hare\\b|Marquis\\b||Khachian\\b|Dominating\\s+Set\\b\\b|Impartial\\s+Culture\\b)[[:upper:]][[:lower:]]", 'Supprimer la majuscule après la virgule ARG1', ""],
 ["Majuscule inattendue",	'[^.?:}](?<![.]\'\')(?<![.]\')(?<![.]")\\s',	'Supprimez la majuscule', ""],
 ["La note de bas de page manque un point",   "[[:alnum:],]\\s*\\\\footnote$recursive_brace\\\\s*[[:upper:]]",'',''],
@@ -89,3 +91,8 @@ Il vaut mieux utiliser une référence formatté (i.e. \\prettyref), plutôt qu\
 ["pas de point à la fin de la définition","[[:alnum:]$end_math]".'\s*.end{definition}',"",""],
 ["pas de point à la fin de .*","[[:alnum:]$end_math]".'(?:\s|%[^\n]*)*.end{(?!algorithmic|enum|item|array|eqnarray|align)',"",""]
 );
+
+
+return (@ErrorTypes);
+}
+

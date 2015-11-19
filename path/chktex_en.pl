@@ -196,7 +196,7 @@ SimpleRule("a special atoms"),
 ["Mixing a and beta.", "aU\\\\beta", '', "I probably mean alpha U beta"],  #Personal Rule
 ["Thus twice", "Thus[^.]*[.]?[^.]*Thus", '', "Try not to use Thus twice in a row"],  #Personal Rule
 ["Macro without {}.", "[^\\\\]\\\\[[:alnum:]]+CTL[[:alnum:]]+\\s", '', "You should probably put a {} after the macro so as not to swallow the space"], 
-["Second word in sentance is captialised.", "[.]\\s+[[:alnum:]]+\\s+(?!$capword)[[:upper:]]", '', "When I capitalise the second word of a sentance it is usually a mistake."], 
+["Second word in sentence is captalised.", "[.]\\s+[[:alnum:]]+\\s+(?!$capword)[[:upper:]]", '', "When I capitalise the second word of a sentance it is usually a mistake."], 
 ["no full stop after cite that ends paragraph", "[[:alnum:]]\\s+\\\\cite[{][^}]*[}]\\s*$par", '', "I think a fullstop is missing here."], 
 #["[cite] note", "\\\\cite[{][^},]*[}]\\s*note\\b", '', "note -> notes"], #If multiple authors or papers, use "note"?
 ["No space after cite", "\\\\cite[{][^}]*[}][[:alnum:]]", '', ""], 

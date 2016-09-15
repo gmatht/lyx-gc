@@ -84,7 +84,7 @@ my $LatexLabels="(?:Example|Chapter|Lemma|Corollary|Theorem|Section)s?";
 my $inquote="(?:[^'].|.|\\s)*(?='')"; # We can be a bit more forgiving of style inside quotes as it need not match the rest of the text. Also this is a bit of a hack as it only handles double quotes.
 
 my $termdef="(?:(?:[[:upper:]][[:alnum:]]*|in|of|the|a|an|to|for|and)\\s+)+(?:\\\\cite[{][^}]*[}]\\s*)?[(]"; #A term definition e.g. University of Western Australia (UWA) ... actually, maybe this should be called an acronym definition. And it should probably be merged with the $acronym. Oh Well.
-my $capword="\\b(SSPM|Case|Figure|Algorithm|Boolean|Booleans|CTAB|English|Apollo|Caen|Utilitarianism|University|(?<=the\\s)School|Ro(?:B|[(]B[)]|)CTL|(?:Society of )?Social Choice and Welfare|(?:University of )?Western Australia|Boolean|Noetherian|Pentium|Backus-Naur\\s+Form|Euclidean|Deontic\\s+S5|Robustly|Prone|Obligatory|AllPaths|Permissible|Viol|Counter-Free|Deontic S5|State-|Definitions?|Prolog|Bayesian|Voice\\s+over\\s+Internet\\s+Protocol|Internet|Denial[- ]of[- ]Service|Contrary-to-Duty|Modus|Necessitation|Wolter|$names|$LatexLabels|Drinkers'? [Pp]aradox|Distribution|Substitution|Obligatory|McCabe|Streett|Dansted|AllPath|Allpath|Next|Until|Computation|Pair-RoCTL|State-RoCTL|Saul|Hughes|Cresswell|Kripke|[[:upper:]]|(?:[[:upper:]][[:lower:]]+(?:\\s|-)+)+.$acronym|$acronym|[[:upper:]][[:lower:]]*,?\\s+[[:upper:]][[:lower:]]*|$day|$termdef|$inquote|Australia|Dr|Prof|Pawsey|Canberra|Greek|First-order Monadic|Until operator|Untils|Table|Conjecture|EXPTIME)\\b";
+my $capword="\\b(SSPM|Case|Ubuntu|Fair B?CTL|Figure|Algorithm|Boolean|Booleans|CTAB|English|Apollo|Caen|Utilitarianism|University|(?<=the\\s)School|Ro(?:B|[(]B[)]|)CTL|(?:Society of )?Social Choice and Welfare|(?:University of )?Western Australia|Boolean|Noetherian|Pentium|Backus-Naur\\s+Form|Euclidean|Deontic\\s+S5|Robustly|Prone|Obligatory|AllPaths|Permissible|Viol|Counter-Free|Deontic S5|State-|Definitions?|Prolog|Bayesian|Voice\\s+over\\s+Internet\\s+Protocol|Internet|Denial[- ]of[- ]Service|Contrary-to-Duty|Modus|Necessitation|Wolter|$names|$LatexLabels|Drinkers'? [Pp]aradox|Distribution|Substitution|Obligatory|McCabe|Streett|Dansted|AllPath|Allpath|Next|Until|Computation|Pair-RoCTL|State-RoCTL|Saul|Hughes|Cresswell|Kripke|[[:upper:]]|(?:[[:upper:]][[:lower:]]+(?:\\s|-)+)+.$acronym|$acronym|[[:upper:]][[:lower:]]*,?\\s+[[:upper:]][[:lower:]]*|$day|$termdef|$inquote|Australia|Dr|Prof|Pawsey|Canberra|Greek|First-order Monadic|Until operator|Untils|Table|Conjecture|EXPTIME)\\b";
 
 #Use of both proof-theory and proof theory.
 
@@ -93,7 +93,9 @@ my $s='(?:\n|\s)';
 our @ErrorTypes=(
  #["Error Name",	"(err[[:space:]]*or.)",	"",  "Error Description"],
 #SimpleRule("satisfiable"),
+SimpleRule("we that", "we see that"), 
 SimpleRule("spelt correctly", "spelled correctly"), #Make Americans Happy.
+SimpleRule("into to", "into"),
 SimpleRule("never-the-less", "nevertheless"),
 SimpleRule("the automata", "the automaton"),
 SimpleRule("but and", "but"),
@@ -219,7 +221,7 @@ SimpleRule("a special atoms"),
 ["No space after reference", 'ref[{][^}]*[}][[:alnum:]]', "", ""],
 #["No fullstop at end of par", '[[:alpha:]]\n\n', "", "?"],
 #["Single char", '\s[b-z]\s(?![&\\\\])(?!', "", "?"],
-["Single char", '\s[b-z]\s(?![&\\\\])'."(?![^$start_math_char]*[_$end_math_char])", "", "?"],
+["Single char", '\s[b-km-z]\s(?![&\\\\])'."(?![^$start_math_char]*[_$end_math_char])", "", "?"],
 ["A likely as", "\\b[Aa]\\s+likely\\s+as", "", "Perhaps you mean 'as likely as'?"],
 ["To modelled", "\\b[Tt]o\\s+modelled\\b", "", "Perhaps you mean 'to model'?"],
 ["A formulae", "\\ba\\s+\\\\?formulae", "", "Formula is plural, why are we using 'a'?"],
@@ -266,7 +268,7 @@ SimpleRule("a special atoms"),
 ["Where as",'[Ww]here\s+as',"Perhaps you meant whereas?", ''],
 ["space between cite and punctuation","\\\\cite[{][^{}]*[}]\\s+[,.]","", ''],
 ["there exist phi","[Tt]here exist $start_math.(?:phi:psi)","", 'Perhaps you mean "there exists *a* ..."'],
-["formula it","[Ff]ormula it","", 'There appears to be something missing between "formula" and "it"'],
+["formula it","[Ff]ormula it\\b","", 'There appears to be something missing between "formula" and "it"'],
 [".Capital",'[.][[:upper:]][^.]',"", 'Perhaps you should put a space between the . and the captial'],
 [".word",'[.][[:lower:]]+[[:space:]]',"", 'Perhaps you should put a space between the . and the word'],
 ["Exists as s..",'[\bEe]xists\s+as\s+s',"", 'Perhaps you meant Exists *a* s...'],
@@ -320,8 +322,8 @@ SimpleRule("a special atoms"),
 ["Ugly fraction",		"([[:digit:]])/([[:digit:]])(?!n[}])(?!_home)",	"erase:\\\\url$recursive_brace", "Use \\nicefrac\{ARG1\}\{ARG2\} instead"],
 ["Too many zeros without a comma",		"(?<!.)0000(?![^\\s]*[.]tex[}])",	"", "You should put a comma in there somewhere"],
 ["Split word","(?:[Ww]ith out|[Ll]ike wise)","ARG1 is a single word", ""],
-["Duplicated Words",	'(?i)\b([[:alpha:]]+)\b[,.;]?\s+\b\2\b'.$notinmath,	'ARG1 occurs twice.', ""],
-["Duplicated Words (broken)",	'(?i)\b(?![[:alpha:]]+\s+by|more\s+and|sets\s+of|that\s+|is\s+|may\s+or|does\s+or\s+does\s+not|neck\s+and\s+neck|as\s+well\s+as|(?:as|of|to)\s)([[:alpha:]]+)\s+(?!to)[[:alpha:]]+\s+\2\b(?![{-])',	'ARG1 occurs twice.', ""],
+["Duplicated Words",	'(?i)\b(a|I|[[:alpha:]][[:alpha:]+*]+)\b[,.;]?\s+\b\2\b'.$notinmath,	'ARG1 occurs twice.', ""],
+["Duplicated Words (broken)",	'(?i)\b(?![[:alpha:]]+\s+by|l |CTL and CTL[+*]|CTL, CTL[+*]|more\s+and|sets\s+of|that\s+|is\s+|may\s+or|does\s+or\s+does\s+not|neck\s+and\s+neck|as\s+well\s+as|(?:as|of|to)\s)([[:alpha:]]+)\s+(?!to)[[:alpha:]]+\s+\2\b(?![{-])',	'ARG1 occurs twice.', ""],
 ["Use of I.e.",	'I\\.e\\.',	'At the beginning of a sentance you should use "That is" rather than "I.e."',''],
 #["Use of E.g.",	'E\\.g\\.',	'At the beginning of a sentance you should use "For example" rather than "E.g."',''],
 ["Use of \"we could\".",	'\\b([Ww]e\\s+c(?:an|ould))(?>!\\s+say)\\b', '',	'In formal text, we should not use ARG1 as it implies you cannot'],
@@ -355,6 +357,7 @@ SimpleRule("a special atoms"),
 ["Lack of Lemma prefix",	"\\b(?!Lemma|and)[^\\s~]+[~\\s]+\\\\ref[{]lem:","",""],
 ["Lack of Corollary prefix",	"\\b(?!Corollary)[^~\\s]+[~\\s]+\\\\ref[{]cor:","",""],
 ["Lack of Theorem prefix",	"\\b(?!Theorem|and)[^\\s~]+[~\\s]+\\\\ref[{]thm:","",""],
+["Lack of Definition prefix",	"\\b(?!Definition|and)[^\\s~]+[~\\s]+\\\\ref[{]def:","",""],
 ["Use of lowercase reference",	"(lemma|theorem|table|figure|corollary)[~ ]\\\\ref\\b", "", 'The first letter of ARG1 should be capitalised to adhere to the LaTeX \\prettyref standard.'],
 #["Use of bare reference",	"(?<!ble|ary|les|ure|mma|rem|and|ion|thm|..,|tep|.to)[~ ]\\\\ref\\b", "", 'A reference should be prefixed with one of "Table", "Figure", "Theorem", "Lemma" ...'],
 ["lemma/theorem occurs before prettyref",	"(emma|heorem|xamples|Example|orollary|efinition)\\s+\\\\prettyref\\b", "", 'It is safer to use a Formatted Reference (i.e. \\prettyref), rather than manually format references, as Formatted References will automatically change the reference if you change the object being referenced (e.g. from a lemma to a theorem).'],
@@ -373,6 +376,7 @@ SimpleRule("a special atoms"),
 #Should return:
 #["Saace before \\label", '(?<!\\\\item) \\\\label', "", "You should delete spaces before labels to maintain correct page references"], #ChKTeX error 24 
 ["Use of however without comma", '[;.]\\s+[Hh]owever(?!,)', "", "Some suggest only using however to start a sentance, or afer a semi-colon, and that it should be followed with a comma."], 
+["Use of Joining word", '[;.]\\s+(?:Hence|Also|Additionally|Likewise)(?!,)', "", "Does this continue on from previous sentance? If so probably add a comma"], 
 ["Is be", '\b[Ii]s\s+be\b', "", "use of Is and be together usually indicates trouble."], 
 ["It represent", '\b[Ii]t\s+represent\b', "", "Prehaps you meant \"It representS\"?"], 
 ["Space before punctuation", $end_math.'\s+(?:\\\\[@])?([;.,])', "", "There is a space before the end of the mathblock and 'ARG1'"], 

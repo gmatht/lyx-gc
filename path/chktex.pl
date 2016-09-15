@@ -417,7 +417,7 @@ my @eitheror = (
 		  [ '', '[Ff]ormulas', '(?<![\\\\])[Ff]ormulae' ],
 		  [ '', '[Ll]emmas', '(?<![\\\\])[Ll]emmata' ],
 		 [ 'Case Mismatch', '(?<![.]\s)(Lemma|Corollary)\s+.ref', '(lemma|corollary)\s+.ref' ],
-		 [ '', '[Cc]olour', '[Cc]olor' ],
+		 [ '', '[Cc]olour', '(?<![\\\\])[Cc]olor' ],
 		 [ '', 'axiomatisation', 'axiomatization' ],
 		 [ 'Case Mismatch[2]', '(?<![.]\s)Theorem\s+.ref', 'theorem\s+.ref' ] );
 #		 [ '', '(?<![.]\s)Theorem', 'theorem' ] );

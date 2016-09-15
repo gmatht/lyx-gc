@@ -4,7 +4,7 @@ use File::Copy;
 
 
 my $JAVA=`which java`;
-my $LANGUAGETOOL_PATH=$ENV{'HOME'}."/.data/LanguageTool-2.5/";
+my $LANGUAGETOOL_PATH=$ENV{'HOME'}."/.data/LanguageTool-2.1/";
 my $LANGUAGETOOL_JAR="languagetool-commandline.jar";
 
 if (! -d $LANGUAGETOOL_PATH) {

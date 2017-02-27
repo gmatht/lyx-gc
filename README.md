@@ -16,28 +16,28 @@ For full functionality you will also want the following software
 Clone or unzip the respository, for example:
 
 ```
-mkdir ~/programs
-cd programs
+mkdir ~/.local
+cd .local
 git clone https://github.com/gmatht/lyx-gc.git
 ```
 
 Add this folder to your ```$PATH``` variable. 
 
 For example, for bash, add to file ```~/.bashrc```: <br>
-   ```export PATH=$PATH:"~/programs/lyx-gc/"```
+   ```export PATH=$PATH:"~/.local/lyx-gc/"```
 
 ###Note on installing Languagetool
 Currently, languagetool has no installer and is not included in any software repository. Suggested installation:
 
 * Download stand-alone version from https://languagetool.org/
-* Unpack in ```~/programs/LanguageTool/```
+* Unpack in ```~/.local/LanguageTool/```
 
 ##Configuration
 Use LanguageTool as grammar checking in lyx-gc:
 
  * Adjust in the file ```lyx-gc/path/chktex.pl.JLanguageTool.pl```:
     * Change the LANGUAGETOOL_PATH variable to the path where  ```languagetool-commandline.jar``` is located.
-    * Example:  ```my $LANGUAGETOOL_PATH=$ENV{'HOME'}."/data/LanguageTool-3.6/";```
+    * Example:  ```my $LANGUAGETOOL_PATH=$ENV{'HOME'}."/.local/LanguageTool-3.6/";```
     
 ##Usage
 Start lyx using the ```lyx-gc``` script, then Menu->Tools->CheckTex.

@@ -36,7 +36,7 @@ if ( -e $altjava ) {
 }
 
 our $languagetool="../../.data/LanguageTool-2.2/languagetool-commandline.jar";
-our $altlanguagetool="/usr/local/share/LanguageTool-2.2/languagetool-commandline.jar";
+our $altlanguagetool="/usr/local/share/LanguageTool/languagetool-commandline.jar";
 if ( -e $altlanguagetool ) { $languagetool=$altlanguagetool; };
 our $detex="detex";
 if ( -e "../tex2txt.pl" ) { $detex="/usr/bin/perl ../tex2txt.pl"; };
@@ -138,7 +138,6 @@ Rassert($m_,' \$ $a$ ','$,$');
 
 Rassert("$mathblock","$start_math abd$end_math edf","$start_math abd$end_math");
 
-our $notinmath="(?![^\\$start_math]*$end_math)";
 our $notinmath="(?![^\\$start_math]*$end_math)";
 Rassert("X.$notinmath","XY foo $start_math XZ abd$end_math","XY");
 

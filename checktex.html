@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html style="padding:0; margin:0; height:100%">
+  <body style="padding:0; margin:0; height:99%">
+    <table style="border:0; padding:0; margin:0; height:100%; width:99%">
+      <tr style="border:0; padding:0; margin:0">
+        <td style="border:0; padding:0; margin:0">
+<html>
+<style>cal {font-family:cursive,roman;}</style>
+<h3>Online Grammar Checker for TeX files</h3>
+<p>This is a simple Grammar Checker for TeX files. Just paste your text into the text box and press Go. This checker has some ability to look inside math text to determine whether it starts with a vowel. For example try "`A $\frac{n}{2}$'-dimensional space is an error but `a fractal' is fine". If you also want output from the 3rd party LanguageTool (LT) Checker appended, check the box; LT errors that are less relevant to TeX will be filtered out. 
+<!-- There are two go buttons as there are two servers. Pick one; if it doesn't work pick the other. Be aware that only the first server uses encyrption, pressing "Go (2)" will send your text unecrypted over the internet.</p>  -->
+<form action="cgi-bin/checktex.cgi" method="POST" target="my_iframe">
+ <textarea name="t" cols=40 rows=2 onkeydown="if (event.keyCode == 13) { this.form.submit(); return false; }"></textarea>
+ <input type="submit" value="Go" onclick="document.forms[0].action='/cgi-bin/checktex.cgi'">
+ <input type="checkbox" name="lt" value="y"/>Include LanguageTool Results? &nbsp; 
+</form>
+
+        </td>
+      </tr>
+      <tr style="border:0; padding:0; margin:0">
+        <td style="border:0; padding:0; margin:0; height:100%">
+<iframe 
+	name="my_iframe"
+        id="m"
+	style="width:100%; height:100%;"
+</iframe>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

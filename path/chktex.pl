@@ -12,7 +12,7 @@
 
 use strict;
 #use diagnostics; #Not availiable in Perl 5.6.1, and not really needed
-use warnings;
+#use warnings;
 use File::Basename;
 #I should also use Regexp::Assemble, with the Track and matched options.
 #use utf8;
@@ -347,8 +347,8 @@ my $short_lang=substr($ENV{"LANG"},0,2);
 my $lang_file=$0;
 $lang_file =~ s/.pl$/_$short_lang.pl/;
 our @ErrorTypes=();
-#print "$lang_file\n";
-do $lang_file;
+#this will usually do "chktex_en.pl"
+do $lang_file or do "./$lang_file";
 
 ##############################################################################
 sub NumNewlines{

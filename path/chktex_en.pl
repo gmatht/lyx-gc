@@ -408,14 +408,14 @@ SimpleRule("a special atoms"),
 ["Space before )",$end_math."[^".$start_math."]*\\s\\)", "", ""],
 ["Converge [to] the",'onverge\s+the.', "", ""],
 ["use or used", '\b[Uu]se\s+[^.;]*is used\b', "", "You used both 'use' and 'is used' in the same sentance. This may indicate that you tried to do something silly like 'We use X is used to Y'."], 
-["Lonely End Proof",$par.'[\\\\]end\{proof\}', "", "You should probably delete the paragraph break before the \\end{proof}"], 
-["Paragraph following COLON",":\\s*$par\\s*[\\\\]begin{(?:eqnarray|align)", "", "You should probably delete the paragraph break after the COLON"], 
+["Lonely End Proof",$par.'[\\\\]end\{proof\}', "", "You should probably delete the paragraph break before the \\end\\{proof}"], 
+["Paragraph following COLON",":\\s*$par\\s*[\\\\]begin\\{(?:eqnarray|align)", "", "You should probably delete the paragraph break after the COLON"], 
 ["Personal rule - remove the i","[Aa]utomation","",""],
-["no full stop at end of definition","[[:alnum:]$end_math]".'\s*.end{definition}',"",""],
+["no full stop at end of definition","[[:alnum:]$end_math]".'\s*.end\{definition\}',"",""],
 #["[^t][^o]$s+provide a", "[^t][^o]$s+provide$s+a\b","",""],
 #["provide a", "[^o]$s+provide$s+a","",""],
 #["provide a", "[^o]$s+provide$s+a","",""],
-["no full stop at end of .*","[[:alnum:]$end_math]".'(?:\s|%[^\n]*)*.end{(?!algorithmic|enum|item|array|eqnarray|align)',"",""]
+["no full stop at end of .*","[[:alnum:]$end_math]".'(?:\s|%[^\n]*)*.end\{(?!algorithmic|enum|item|array|eqnarray|align)',"",""]
 );
 
 

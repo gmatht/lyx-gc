@@ -1,6 +1,6 @@
 # Readme for lyx-gc
 
-A Grammar Checker for LyX and LaTeX
+A Grammar Checker for LyX and LaTeX. There is an [online demo](http://mccabedj.ucc.asn.au/checktex.html).
 
 A more elaborate readme is found on the [LyX-wiki](http://wiki.lyx.org/Tools/LyX-GrammarChecker)
 

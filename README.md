@@ -7,10 +7,10 @@ A more elaborate readme is found on the [LyX-wiki](http://wiki.lyx.org/Tools/LyX
 ## Dependencies
 For full functionality you will also want the following software
 
-* [ChkTeX](http://www.baruch.ev-en.org/proj/chktex/) (available as debian package and via ctan)
+* [ChkTeX](http://www.baruch.ev-en.org/proj/chktex/) (available as debian package, via ctan, and for Windows it is included in MikTex)
 * [LanguageTool](https://www.languagetool.org/)
 
-On Windows, you also need Bash to run the commands. You can use Git bash for this purpose.
+On Windows, you also need Bash to run the commands. You can use Git bash for this purpose. 
 
 ## Installation
 
@@ -26,6 +26,8 @@ Add this folder to your ```$PATH``` variable.
 
 For example, for bash, add to file ```~/.bashrc```: <br>
    ```export PATH=$PATH:"~/.local/lyx-gc/"```
+
+You also should add chktex directory to the path.
 
 ### Note on installing Languagetool
 Currently, languagetool has no installer and is not included in any software repository. Suggested installation:

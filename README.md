@@ -10,6 +10,7 @@ For full functionality you will also want the following software
 * [ChkTeX](http://www.baruch.ev-en.org/proj/chktex/) (available as debian package and via ctan)
 * [LanguageTool](https://www.languagetool.org/)
 
+On Windows, you also need Bash to run the commands. You can use Git bash for this purpose.
 
 ## Installation
 
@@ -39,6 +40,8 @@ Use LanguageTool as grammar checking in lyx-gc:
     * Change the LANGUAGETOOL_PATH variable to the path where  ```languagetool-commandline.jar``` is located.
     * Example:  ```my $LANGUAGETOOL_PATH=$ENV{'HOME'}."/.local/LanguageTool-3.6/";```
     
+    * On Windows, the path should be written using forward slash. For example, ``` my $LANGUAGETOOL_PATH=$ENV{'HOME'}."C:/LanguageTool-4.9.1"; ```
+ 
 ## Usage
 Start lyx using the ```lyx-gc``` script, then Menu->Tools->CheckTex.
 

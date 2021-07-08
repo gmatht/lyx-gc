@@ -23,7 +23,7 @@ export PATH=$LYXGC_PATH:$PATH
 echo Path used by lyx is: $PATH
 if test -z "$LYX";then
 	echo b
-	LYX=`which i786-pc-linux-gnu-lyx lyx-qt lyx-xforms lyx | head -n1`
+	LYX=`which i786-pc-linux-gnu-lyx lyx-qt lyx-xforms lyx | head -n 1`
 fi
 export LYX_GUI=qt
 echo "$LYX" "$@"
